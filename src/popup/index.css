@@ -1,1 +1,22 @@
 @import "tailwindcss";
+
+@theme {
+  --color-main: #434a6d;
+  --color-main2: #5b6494;
+  --color-light_main: #004ca4;
+  --color-red: #ff3b30;
+  --color-naver_green: #42d31a;
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-green: #34c759;
+  --color-text: #474747;
+  --color-grey: #bbbbbb;
+  --color-dark_grey: #868686;
+
+  --text-caption: 12px;
+  --text-body: 14px;
+  --text-title3: 32px;
+  --text-title2: 36px;
+  --text-title1: 56px;
+  --text-logo: 18px;
+}
