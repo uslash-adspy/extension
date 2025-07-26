@@ -1,9 +1,9 @@
-import { CreateElement, PushElements, GetBody } from "./common";
+import { CreateElementClassName, PushElements, GetBody } from "./common";
 
 const CreateOverlay = () => {
-  const overlay = CreateElement("div", "overlay");
+  const overlay = CreateElementClassName("div", "overlay");
 
-  const overlayCloseBtn = CreateElement("p", "overlay-close-btn");
+  const overlayCloseBtn = CreateElementClassName("p", "overlay-close-btn");
 
   overlayCloseBtn.textContent = "X";
   overlayCloseBtn.addEventListener("click", () => {
