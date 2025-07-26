@@ -39,6 +39,97 @@ function createSidePanel() {
   const panel = CreateElementId("div", "panel");
 
   const panelHader = CreateElementClassName("div", "panel-header");
+
+  const pieChartWrapper = CreateElementId("div", "pie-chart-wrapper");
+
+  pieChartWrapper.textContent = "현재 의심도";
+
+  const pieChart = CreateElementId("div", "pie-chart");
+
+  const pieChartCircle = CreateElementId("div", "pie-chart-circle");
+
+  const value = 80; // 0~100 사이 값
+  const percentAngle = 360 * (value / 100);
+
+  const size = 50;
+  const radius = size / 2;
+  const center = size / 2;
+
+  const degToRad = (deg: number) => (Math.PI / 180) * deg;
+  const startAngle = -90;
+
+  const getCoordinates = (angle: number) => {
+    const x = center + radius * Math.cos(degToRad(angle));
+    const y = center + radius * Math.sin(degToRad(angle));
+    return { x, y };
+  };
+
+  const color = value <= 50 ? "#0088FF" : "#EA3434";
+
+  // svg 초기 렌더링
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("width", String(size));
+  svg.setAttribute("height", String(size));
+  svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
+
+  // 기본 회색 배경 원
+  const bgCircle = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "circle"
+  );
+  bgCircle.setAttribute("cx", String(center));
+  bgCircle.setAttribute("cy", String(center));
+  bgCircle.setAttribute("r", String(radius));
+  bgCircle.setAttribute("fill", "#ccc");
+  svg.appendChild(bgCircle);
+
+  // pie path
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("fill", color);
+  svg.appendChild(path);
+
+  pieChartCircle.innerHTML = ""; // 기존 내용 비우기
+  pieChartCircle.appendChild(svg);
+
+  // 애니메이션
+  //   let currentAngle = 0;
+  const animationDuration = 1000; // 1초
+  const frameRate = 60;
+  const totalFrames = (animationDuration / 1000) * frameRate;
+  let frame = 0;
+
+  function animatePie() {
+    const progress = frame / totalFrames;
+    const currentSweep = percentAngle * progress;
+    const endAngle = startAngle + currentSweep;
+
+    const { x: x1, y: y1 } = getCoordinates(startAngle);
+    const { x: x2, y: y2 } = getCoordinates(endAngle);
+
+    const largeArcFlag = currentSweep > 180 ? 1 : 0;
+
+    const d = `
+    M ${center} ${center}
+    L ${x1} ${y1}
+    A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}
+    Z
+  `;
+    path.setAttribute("d", d);
+
+    if (frame < totalFrames) {
+      frame++;
+      requestAnimationFrame(animatePie);
+    }
+  }
+
+  // 시작 지연 없이 바로 실행
+  setInterval(() => {
+    animatePie();
+  }, 500);
+
+  const pieChartInnerCircle = CreateElementId("div", "pie-chart-inner-circle");
+  pieChartInnerCircle.textContent = `${value}%`;
+
   const closeBtn = CreateElementId("button", "close-btn");
   closeBtn.innerHTML = `
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -63,129 +154,6 @@ function createSidePanel() {
     </svg>
   `;
 
-  //   sidePanel = document.createElement("div");
-  //   sidePanel.innerHTML = `
-  //     <style>
-  //       #chat-container::-webkit-scrollbar { width: 4px; }
-  //       #chat-container::-webkit-scrollbar-track { background: transparent; }
-  //       #chat-container::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
-  //       #chat-container::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
-  //     </style>
-  //     <div id="panel" style="
-  //       position: fixed;
-  //       top: 0;
-  //       right: 0;
-  //       width: 380px;
-  //       height: 100vh;
-  //       background: #fafbfc;
-  //       border-left: 1px solid #e1e5e9;
-  //       transform: translateX(100%);
-  //       transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  //       z-index: 9999;
-  //       box-shadow: -2px 0 24px rgba(0, 0, 0, 0.08);
-  //       display: flex;
-  //       flex-direction: column;
-  //     ">
-  //       <div style="
-  //         position: relative;
-  //         height: 52px;
-  //         background: white;
-  //         display: flex;
-  //         align-items: center;
-  //         justify-content: flex-end;
-  //         padding: 0 20px;
-  //         border-bottom: 1px solid #f1f3f5;
-  //         flex-shrink: 0;
-  //       ">
-  //         <button id="close-btn" style="
-  //           width: 28px;
-  //           height: 28px;
-  //           background: #f8f9fa;
-  //           color: #6b7280;
-  //           border: none;
-  //           cursor: pointer;
-  //           transition: all 0.2s ease;
-  //           display: flex;
-  //           align-items: center;
-  //           justify-content: center;
-  //           border-radius: 14px;
-  //         ">
-  //           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-  //             <path d="M18 6L6 18M6 6l12 12" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-  //           </svg>
-  //         </button>
-  //       </div>
-
-  //       <div style="
-  //         flex: 1;
-  //         padding: 16px;
-  //         padding-bottom: 80px;
-  //         overflow-y: auto;
-  //         background: #fafbfc;
-  //         scrollbar-width: thin;
-  //         scrollbar-color: #d1d5db transparent;
-  //       " id="chat-container"></div>
-
-  //       <div style="
-  //         position: absolute;
-  //         bottom: 20px;
-  //         left: 20px;
-  //         right: 20px;
-  //         z-index: 10;
-  //       ">
-  //         <div style="
-  //           position: relative;
-  //           display: flex;
-  //           align-items: center;
-  //           max-width: 340px;
-  //           margin: 0 auto;
-  //         ">
-  //           <input type="text" placeholder="메시지를 입력하세요..." id="chat-input" style="
-  //             width: 100%;
-  //             border: 1px solid #e1e5e9;
-  //             border-radius: 24px;
-  //             padding: 14px 52px 14px 20px;
-  //             font-size: 14px;
-  //             color: #374151;
-  //             outline: none;
-  //             transition: all 0.2s ease;
-  //             background: white;
-  //             box-sizing: border-box;
-  //             box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
-  //           " />
-  //           <button id="send-btn" style="
-  //             position: absolute;
-  //             right: 6px;
-  //             width: 36px;
-  //             height: 36px;
-  //             background: #5A9CFF;
-  //             border: none;
-  //             cursor: pointer;
-  //             border-radius: 18px;
-  //             color: white;
-  //             transition: all 0.15s ease;
-  //             display: flex;
-  //             align-items: center;
-  //             justify-content: center;
-  //             box-shadow: 0 2px 6px rgba(90, 156, 255, 0.3);
-  //           ">
-  //             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-  //               <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-  //             </svg>
-  //           </button>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   `;
-
-  //   const panel = sidePanel.querySelector("#panel") as HTMLDivElement;
-  //   const closeBtn = sidePanel.querySelector("#close-btn") as HTMLButtonElement;
-  //   const chatContainer = sidePanel.querySelector(
-  //     "#chat-container"
-  //   ) as HTMLDivElement;
-  //   const chatInput = sidePanel.querySelector("#chat-input") as HTMLInputElement;
-  //   const sendBtn = sidePanel.querySelector("#send-btn") as HTMLButtonElement;
-
   closeBtn.addEventListener("mouseenter", () => {
     closeBtn.style.background = "#e5e7eb";
     closeBtn.style.color = "#374151";
@@ -196,7 +164,11 @@ function createSidePanel() {
   });
   closeBtn.addEventListener("click", closeSidePanel);
 
-  PushElements(panelHader, [closeBtn]);
+  PushElements(pieChart, [pieChartCircle, pieChartInnerCircle]);
+
+  PushElements(pieChartWrapper, [pieChart]);
+
+  PushElements(panelHader, [pieChartWrapper, closeBtn]);
 
   PushElements(chatInputWrapper, [chatInput, sendBtn]);
 
