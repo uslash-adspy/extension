@@ -1,31 +1,15 @@
+import { analyzeCurrentPage, sendChatMessage, type ChatMessage } from './api';
+
 let isOpen = false;
 let toggleButton: HTMLButtonElement | null = null;
 let sidePanel: HTMLDivElement | null = null;
 let isLoading = false;
-let analysisResult: any = null;
 let globalIframeContent = "";
 
-const ANALYZE_API = "https://5a6659b6cef6.ngrok-free.app";
-const CHAT_API = "https://ae4038d76e36.ngrok-free.app";
-
-interface AnalysisResult {
-  category: string;
-  isAd: boolean;
-  backAdPercentage: number;
-  adProbability: number;
-  adUrls: string[];
-  comment: string;
-}
-
-interface ChatMessage {
-  content: string;
-  type: "user" | "bot";
-  timestamp: number;
-}
-
 function createToggleButton() {
-  setTimeout(() => {
-    analyzeCurrentPage();
+  setTimeout(async () => {
+    const content = extractBlogContent();
+    await analyzeCurrentPage(content);
   }, 2000);
 
   toggleButton = document.createElement("button");
@@ -157,70 +141,7 @@ function extractBlogContent(): string {
   return content.substring(0, 3000);
 }
 
-async function analyzeCurrentPage(): Promise<AnalysisResult | null> {
-  try {
-    const content = extractBlogContent();
 
-    const response = await fetch(`${ANALYZE_API}/api/analyze`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "ngrok-skip-browser-warning": "true",
-      },
-      body: JSON.stringify({
-        url: window.location.href,
-        content: content,
-      }),
-    });
-
-    if (!response.ok) throw new Error("분석 요청 실패");
-
-    return await response.json();
-  } catch (error) {
-    console.error("분석 오류:", error);
-    return null;
-  }
-}
-
-async function sendChatMessage(
-  _userMessage: string,
-  chatHistory: ChatMessage[]
-): Promise<string> {
-  try {
-    let content = extractBlogContent();
-    if (content.length < 100 && globalIframeContent.length > 50) {
-      content = globalIframeContent;
-    }
-    const chat = chatHistory.map((msg) => ({
-      role: msg.type === "user" ? "user" : "assistant",
-      content: msg.content,
-    }));
-
-    const response = await fetch(`${CHAT_API}/chat`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "ngrok-skip-browser-warning": "true",
-      },
-      body: JSON.stringify({
-        chat: chat,
-        content: content,
-      }),
-    });
-
-    if (!response.ok) throw new Error("채팅 요청 실패");
-
-    const data = await response.json();
-    return data.response;
-  } catch (error) {
-    console.error("채팅 오류:", error);
-    return "죄송합니다. 응답을 생성할 수 없습니다.";
-  }
-}
-
-function createAnalysisResultView(_result: AnalysisResult): string {
-  return "";
-}
 
 function createSidePanel() {
   sidePanel = document.createElement("div");
@@ -451,7 +372,11 @@ function createSidePanel() {
     setLoading(true);
 
     const chatHistory = loadChatHistory();
-    const response = await sendChatMessage(message, chatHistory);
+    let content = extractBlogContent();
+    if (content.length < 100 && globalIframeContent.length > 50) {
+      content = globalIframeContent;
+    }
+    const response = await sendChatMessage(message, chatHistory, content);
 
     addMessage(response, "bot");
     setLoading(false);
