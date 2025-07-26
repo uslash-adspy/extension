@@ -4,6 +4,7 @@ import { Slogan } from "./shared/ui/Slogan";
 import { Platform } from "./shared/ui/Platform";
 import { Toggle } from "./shared/ui/Toggle";
 import { useToggle } from "./shared/store/useToggle";
+import { Guide } from "./shared/ui/Guide";
 
 function App() {
   const [isInBlog, setIsInBlog] = useState(false);
@@ -15,11 +16,10 @@ function App() {
 
       const isNaverBlog = currentTabUrl.includes("https://blog.naver.com");
       const width = isNaverBlog ? 247 : 287;
-      const height = isNaverBlog ? 219 : 143;
+      const height = isNaverBlog ? 243 : 143;
 
       setIsInBlog(isNaverBlog);
 
-      window.resizeTo(width, height);
       document.body.style.width = `${width}px`;
       document.body.style.height = `${height}px`;
     });
@@ -39,6 +39,7 @@ function App() {
         <Slogan />
         <Platform />
         <Toggle />
+        <Guide />
       </div>
     );
   }

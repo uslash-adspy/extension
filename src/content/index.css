@@ -1,0 +1,61 @@
+body {
+  position: relative;
+}
+
+.overlay * {
+  padding: 0;
+  margin: 0;
+}
+
+.overlay {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+
+  background: #00000050;
+
+  display: flex;
+  justify-content: end;
+  align-items: start;
+}
+
+.overlay-hidden {
+  display: none;
+}
+
+.overlay-close-btn {
+  font-size: 50px;
+  color: white;
+}
+
+.toggle-btn {
+  position: fixed;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #5a9cff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  z-index: 10000;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px rgba(90, 156, 255, 0.3);
+}
+
+.toggle-btn:hover {
+  background: #4a8fff;
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 4px 16px rgba(90, 156, 255, 0.4);
+}
+
+.hidden {
+  display: none;
+}
