@@ -3,9 +3,7 @@ const CreateElementClassName = <K extends keyof HTMLElementTagNameMap>(
   className: string
 ) => {
   const createdElement = document.createElement(element);
-
   createdElement.classList = className;
-
   return createdElement;
 };
 
@@ -14,9 +12,7 @@ const CreateElementId = <K extends keyof HTMLElementTagNameMap>(
   id: string
 ) => {
   const createdElement = document.createElement(element);
-
   createdElement.id = id;
-
   return createdElement;
 };
 
@@ -35,16 +31,50 @@ const GetBody = () => {
 };
 
 let globalIframeContent = "";
+let cachedAnalysisResult: any = null;
+
+function parseNaverBlogUrl() {
+  const url = window.location.href;
+
+  const patterns = [
+    /blogId=([^&]+).*logNo=(\d+)/,
+    /blog\.naver\.com\/([^\/]+)\/(\d+)/,
+    /m\.blog\.naver\.com\/([^\/]+)\/(\d+)/,
+    /blog\.naver\.com\/([^\/]+)\/(\d+)\?.*/,
+    /blog\.naver\.com\/([^\/]+)\/(\d+)#.*/,
+    /m\.blog\.naver\.com\/([^\/]+)\/(\d+)\?.*/,
+    /m\.blog\.naver\.com\/([^\/]+)\/(\d+)#.*/,
+  ];
+
+  let urlMatch = null;
+  for (const pattern of patterns) {
+    urlMatch = url.match(pattern);
+    if (urlMatch) break;
+  }
+
+  if (!urlMatch) return null;
+
+  const blogId = urlMatch[1];
+  const logNo = urlMatch[2];
+  const analysisKey = `adspy-analysis-${blogId}-${logNo}`;
+  const chatKey = `adspy-chat-${blogId}-${logNo}`;
+
+  return {
+    blogId,
+    logNo,
+    cleanUrl: `https://blog.naver.com/${blogId}/${logNo}`,
+    analysisKey,
+    chatKey,
+  };
+}
 
 function extractBlogContent(): string {
   if (globalIframeContent.length > 50) {
-    console.log("전체 블로그 내용:", globalIframeContent);
     return globalIframeContent;
   }
 
   let content = "";
 
-  // iframe이 있는지 확인 (네이버 블로그의 경우)
   const mainFrame = document.querySelector("#mainFrame") as HTMLIFrameElement;
   if (mainFrame && mainFrame.contentDocument) {
     try {
@@ -119,9 +149,16 @@ function extractBlogContent(): string {
     .replace(/[\n\r\t]/g, " ")
     .trim();
 
-  console.log("전체 블로그 내용:", content);
   return content.substring(0, 3000);
 }
+
+const setCachedAnalysisResult = (result: any) => {
+  cachedAnalysisResult = result;
+};
+
+const getCachedAnalysisResult = () => {
+  return cachedAnalysisResult;
+};
 
 export {
   CreateElementClassName,
@@ -130,4 +167,7 @@ export {
   PushElements,
   GetBody,
   extractBlogContent,
+  setCachedAnalysisResult,
+  getCachedAnalysisResult,
+  parseNaverBlogUrl,
 };

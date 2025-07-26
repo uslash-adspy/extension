@@ -22,13 +22,10 @@ export default defineConfig({
         chunkFileNames: "[name].js",
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name || "";
-          // CSS 파일명 지정
           if (info.endsWith(".css")) {
-            // content 관련 CSS
             if (info.includes("content") || info.includes("index")) {
               return "content.css";
             }
-            // popup 관련 CSS
             if (info.includes("popup")) {
               return "popup.css";
             }

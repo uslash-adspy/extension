@@ -1,5 +1,11 @@
-const ANALYZE_API = "https://5a6659b6cef6.ngrok-free.app";
-const CHAT_API = "https://ae4038d76e36.ngrok-free.app";
+import { parseNaverBlogUrl } from "./common";
+
+const API_CONFIG = {
+  ANALYZE_API: "https://3aaab2e17f40.ngrok-free.app",
+  CHAT_API: "https://6fc192b59420.ngrok-free.app",
+  RETRY_ATTEMPTS: 3,
+  RETRY_DELAY: 1000,
+};
 
 export interface AnalysisResult {
   category: string;
@@ -14,27 +20,60 @@ export interface ChatMessage {
   content: string;
   type: "user" | "bot";
   timestamp: number;
+  result?: string | null;
 }
 
-export async function analyzeCurrentPage(content: string): Promise<AnalysisResult | null> {
+export interface ChatResponse {
+  content: string;
+  result: string | null;
+}
+
+async function retryRequest<T>(
+  requestFn: () => Promise<T>,
+  attempts: number = API_CONFIG.RETRY_ATTEMPTS
+): Promise<T> {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await requestFn();
+    } catch (error) {
+      if (i === attempts - 1) throw error;
+      await new Promise((resolve) =>
+        setTimeout(resolve, API_CONFIG.RETRY_DELAY * (i + 1))
+      );
+    }
+  }
+  throw new Error("Max retry attempts reached");
+}
+
+export async function analyzeCurrentPage(
+  content: string
+): Promise<AnalysisResult | null> {
   try {
-    const response = await fetch(`${ANALYZE_API}/api/analyze`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "ngrok-skip-browser-warning": "true",
-      },
-      body: JSON.stringify({
-        url: window.location.href,
-        content: content,
-      }),
+    const urlInfo = parseNaverBlogUrl();
+    const cleanUrl = urlInfo ? urlInfo.cleanUrl : window.location.href;
+
+    return await retryRequest(async () => {
+      const response = await fetch(`${API_CONFIG.ANALYZE_API}/api/analyze`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+        },
+        body: JSON.stringify({
+          url: cleanUrl,
+          content: content,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `분석 요청 실패: ${response.status} ${response.statusText}`
+        );
+      }
+
+      return await response.json();
     });
-
-    if (!response.ok) throw new Error("분석 요청 실패");
-
-    return await response.json();
   } catch (error) {
-    console.error("분석 오류:", error);
     return null;
   }
 }
@@ -43,31 +82,42 @@ export async function sendChatMessage(
   _userMessage: string,
   chatHistory: ChatMessage[],
   content: string
-): Promise<string> {
+): Promise<ChatResponse> {
   try {
+    const urlInfo = parseNaverBlogUrl();
+    const cleanUrl = urlInfo ? urlInfo.cleanUrl : window.location.href;
+
     const chat = chatHistory.map((msg) => ({
       role: msg.type === "user" ? "user" : "assistant",
       content: msg.content,
     }));
 
-    const response = await fetch(`${CHAT_API}/chat`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "ngrok-skip-browser-warning": "true",
-      },
-      body: JSON.stringify({
-        chat: chat,
-        content: content,
-      }),
+    return await retryRequest(async () => {
+      const response = await fetch(`${API_CONFIG.CHAT_API}/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+        },
+        body: JSON.stringify({
+          url: cleanUrl,
+          chat: chat,
+          content: content,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `채팅 요청 실패: ${response.status} ${response.statusText}`
+        );
+      }
+
+      return await response.json();
     });
-
-    if (!response.ok) throw new Error("채팅 요청 실패");
-
-    const data = await response.json();
-    return data.response;
   } catch (error) {
-    console.error("채팅 오류:", error);
-    return "죄송합니다. 응답을 생성할 수 없습니다.";
+    return {
+      content: "죄송합니다. 응답을 생성할 수 없습니다.",
+      result: null,
+    };
   }
 }

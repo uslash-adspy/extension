@@ -5,8 +5,8 @@
   "description": "Chrome extension for ad analysis and monitoring",
   "permissions": ["activeTab", "storage"],
   "host_permissions": [
-    "https://5a6659b6cef6.ngrok-free.app/*",
-    "https://ae4038d76e36.ngrok-free.app/*"
+    "https://3aaab2e17f40.ngrok-free.app/*",
+    "https://6fc192b59420.ngrok-free.app/*"
   ],
   "action": {
     "default_popup": "src/popup/index.html",
@@ -14,7 +14,12 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://blog.naver.com/*", "*://*.blog.naver.com/*"],
+      "matches": [
+        "*://blog.naver.com/*",
+        "*://*.blog.naver.com/*",
+        "*://m.blog.naver.com/*",
+        "*://*.m.blog.naver.com/*"
+      ],
       "js": ["content.js"],
       "css": ["content.css"],
       "all_frames": true
@@ -26,7 +31,12 @@
   "web_accessible_resources": [
     {
       "resources": ["content.css"],
-      "matches": ["*://blog.naver.com/*", "*://*.blog.naver.com/*"]
+      "matches": [
+        "*://blog.naver.com/*",
+        "*://*.blog.naver.com/*",
+        "*://m.blog.naver.com/*",
+        "*://*.m.blog.naver.com/*"
+      ]
     }
   ]
 }
