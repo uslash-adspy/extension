@@ -4,7 +4,9 @@ import {
   CreateElementId,
   GetBody,
   PushElements,
+  extractBlogContent,
 } from "./common";
+import { analyzeCurrentPage, AnalysisResult } from "./api";
 
 let isOpen = false;
 
@@ -24,7 +26,11 @@ function createToggleButton() {
   body.appendChild(toggleBtn);
 }
 
-function createSidePanel() {
+async function createSidePanel() {
+  const analyzeData = (await analyzeCurrentPage(
+    extractBlogContent()
+  )) as AnalysisResult;
+
   const sidePanel = CreateElementId("div", "panel-wrapper");
 
   const sidePannelStyle = CreateElement("style");
@@ -48,7 +54,7 @@ function createSidePanel() {
 
   const pieChartCircle = CreateElementId("div", "pie-chart-circle");
 
-  const value = 80; // 0~100 사이 값
+  const value = analyzeData.backAdPercentage; // 0~100 사이 값
   const percentAngle = 360 * (value / 100);
 
   const size = 50;
