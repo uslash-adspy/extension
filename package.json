@@ -15,19 +15,20 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0-alpha.26",
+    "@types/chrome": "^0.0.268",
+    "@types/node": "^24.1.0",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
-    "@types/chrome": "^0.0.268",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
     "@typescript-eslint/parser": "^7.2.0",
     "@vitejs/plugin-react": "^4.2.1",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
+    "tailwindcss": "^4.0.0-alpha.26",
     "typescript": "^5.2.2",
-    "vite": "^5.2.0",
-    "@tailwindcss/vite": "^4.0.0-alpha.26",
-    "tailwindcss": "^4.0.0-alpha.26"
+    "vite": "^5.2.0"
   },
   "packageManager": "pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39"
 }
